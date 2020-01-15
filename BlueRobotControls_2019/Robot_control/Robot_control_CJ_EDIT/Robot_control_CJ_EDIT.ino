@@ -11,6 +11,8 @@
 
 #include <Servo.h>
 //note when using the servo library the frequency is not important because the way servo signals work, be sure to understand why this is...
+#define COUNTER 5
+int timer = 0;
 
 Servo leftmotor;
 Servo rightmotor;
@@ -30,6 +32,7 @@ int countr = 0;
 char armstatel = 'X';   //Records the last state of the lower arm (This actually might not be needed)
 char armstateu = 'Y';   //Records the last state of the upper arm (This actually might not be needed)
 
+
 void setup() {
   leftmotor.attach(9);
   rightmotor.attach(10);
@@ -42,21 +45,25 @@ void setup() {
 }
 
 void loop() {
+  //Testing phase of the code
+  Serial.print("Values-C-L-R-VL-VR-T0-T1:");
+  Serial.print(controlinput);
+  Serial.print(" ");
+  Serial.print(lastleft);
+  Serial.print(" ");
+  Serial.print(lastright);
+  Serial.print(" ");
+  Serial.print(variableleft);
+  Serial.print(" ");
+  Serial.print(variableright);
+  Serial.print(" ");
+  Serial.print(timer);
+  Serial.print(" ");
+  Serial.print("\n");
   //only update when there is serialdata incoming
   if(Serial.available()>0){ 
     controlinput = Serial.read();
-    Serial.print("Values-C-L-R-VL-VR:");
-    Serial.print(controlinput);
-    Serial.print(" ");
-    Serial.print(lastleft);
-    Serial.print(" ");
-    Serial.print(lastright);
-    Serial.print(" ");
-    Serial.print(variableleft);
-    Serial.print(" ");
-    Serial.print(variableright);
-    Serial.print(" ");
-    Serial.print("\n");
+    
     //This is for the motor control
     if(controlinput == '0'){
       lastleft = '0';
@@ -156,70 +163,71 @@ void loop() {
   if(lastleft == '0'){
     variableleft = 95;
   }
-  if(lastright == '1'){
-    variableright = 95;
-  }
-  if(lastleft == '2'){
+  else if(lastleft == '2' && timer== 0){
       if(variableleft < 120){
         variableleft++;
       }
-      if(variableleft > 120){
+      else if(variableleft > 120){
         variableleft--;
       }
   }
-  if(lastright == '3'){
-      if(variableright < 120){
-        variableright++;
-      }
-      if(variableright > 120){
-        variableright--;
-      }
-  }
-  if(lastleft == '4'){
+  else if(lastleft == '4' && timer== 0){
       if(variableleft > 60){
         variableleft--;
       }
-      if(variableleft < 60){
+      else if(variableleft < 60){
         variableleft++;
       }
   }
-  if(lastright == '5'){
-      if(variableright > 60){
-        variableright--;
-      }
-      if(variableright < 60){
-        variableright++;
-      }
-  }
-  if(lastleft == '6'){
+  else if(lastleft == '6' && timer== 0){
       if(variableleft < 150){
         variableleft++;
       }
-      if(variableleft > 150){
+      else if(variableleft > 150){
         variableleft--;
       }
   }
-  if(lastright == '7'){
-      if(variableright < 150){
-        variableright++;
-      }
-      if(variableright > 150){
-        variableright--;
-      }  
-  }
-  if(lastleft == '8'){
+  else if(lastleft == '8' && timer== 0){
       if(variableleft > 30){
         variableleft--;
       }
-      if(variableleft < 30){
+      else if(variableleft < 30){
         variableleft++;
       }
   }
-  if(lastright == '9'){
+
+  if(lastright == '1'){
+    variableright = 95;
+  }
+  else if(lastright == '3' && timer== 0){
+      if(variableright < 120){
+        variableright++;
+      }
+      else if(variableright > 120){
+        variableright--;
+      }
+  }
+  else if(lastright == '5' && timer== 0){
+      if(variableright > 60){
+        variableright--;
+      }
+      else if(variableright < 60){
+        variableright++;
+      }
+  }
+  else if(lastright == '7' && timer== 0){
+      if(variableright < 150){
+        variableright++;
+      }
+      else if(variableright > 150){
+        variableright--;
+      }  
+  }
+  else if(lastright == '9' && timer== 0){
       if(variableright > 30){
         variableright--;
       }
-      if(variableright < 30){
+      else if(variableright < 30){
         variableright++;
       }
   }
@@ -229,6 +237,12 @@ void loop() {
   rightmotor.write(variableright);
   armbase.write(armbasepos);
   
+  if(timer >=COUNTER){
+    timer=0;
+  }
+  else{
+    timer++;
+  }
   //This count is just a very unprofessional way to make the robot stop if it hasn't recieved input from the controller after so many clock cycles [safety check]
 //  countl++;
 //  countr++;
