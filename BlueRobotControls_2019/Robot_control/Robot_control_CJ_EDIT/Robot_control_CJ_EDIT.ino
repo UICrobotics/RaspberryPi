@@ -11,6 +11,8 @@
 
 #include <Servo.h>
 //note when using the servo library the frequency is not important because the way servo signals work, be sure to understand why this is...
+int COUNTER = 3;
+int timer[2] = {0,0};
 
 Servo leftmotor;
 Servo rightmotor;
@@ -30,6 +32,7 @@ int countr = 0;
 char armstatel = 'X';   //Records the last state of the lower arm (This actually might not be needed)
 char armstateu = 'Y';   //Records the last state of the upper arm (This actually might not be needed)
 
+
 void setup() {
   leftmotor.attach(9);
   rightmotor.attach(10);
@@ -42,21 +45,27 @@ void setup() {
 }
 
 void loop() {
+  //Testing phase of the code
+  Serial.print("Values-C-L-R-VL-VR-T0-T1:");
+//  Serial.print(controlinput);
+//  Serial.print(" ");
+//  Serial.print(lastleft);
+//  Serial.print(" ");
+//  Serial.print(lastright);
+//  Serial.print(" ");
+  Serial.print(variableleft);
+  Serial.print(" ");
+  Serial.print(variableright);
+  Serial.print(" ");
+  Serial.print(timer[0]);
+  Serial.print(" ");
+  Serial.print(timer[1]);
+  Serial.print(" ");
+  Serial.print("\n");
   //only update when there is serialdata incoming
   if(Serial.available()>0){ 
     controlinput = Serial.read();
-    Serial.print("Values-C-L-R-VL-VR:");
-    Serial.print(controlinput);
-    Serial.print(" ");
-    Serial.print(lastleft);
-    Serial.print(" ");
-    Serial.print(lastright);
-    Serial.print(" ");
-    Serial.print(variableleft);
-    Serial.print(" ");
-    Serial.print(variableright);
-    Serial.print(" ");
-    Serial.print("\n");
+    
     //This is for the motor control
     if(controlinput == '0'){
       lastleft = '0';
@@ -156,72 +165,97 @@ void loop() {
   if(lastleft == '0'){
     variableleft = 95;
   }
-  if(lastright == '1'){
-    variableright = 95;
-  }
-  if(lastleft == '2'){
+  else if(lastleft == '2' && timer[0]==0){
+      timer[0]++;
       if(variableleft < 120){
         variableleft++;
       }
-      if(variableleft > 120){
+      else if(variableleft > 120){
         variableleft--;
       }
   }
-  if(lastright == '3'){
-      if(variableright < 120){
-        variableright++;
-      }
-      if(variableright > 120){
-        variableright--;
-      }
-  }
-  if(lastleft == '4'){
+  else if(lastleft == '4' && timer[0]==0){
+      timer[0]++;
       if(variableleft > 60){
         variableleft--;
       }
-      if(variableleft < 60){
+      else if(variableleft < 60){
         variableleft++;
       }
   }
-  if(lastright == '5'){
-      if(variableright > 60){
-        variableright--;
-      }
-      if(variableright < 60){
-        variableright++;
-      }
-  }
-  if(lastleft == '6'){
+  else if(lastleft == '6' && timer[0]==0){
+      timer[0]++;
       if(variableleft < 150){
         variableleft++;
       }
-      if(variableleft > 150){
+      else if(variableleft > 150){
         variableleft--;
       }
   }
-  if(lastright == '7'){
-      if(variableright < 150){
-        variableright++;
-      }
-      if(variableright > 150){
-        variableright--;
-      }  
-  }
-  if(lastleft == '8'){
+  else if(lastleft == '8' && timer[0]==0){
+      timer[0]++;
       if(variableleft > 30){
         variableleft--;
       }
-      if(variableleft < 30){
+      else if(variableleft < 30){
         variableleft++;
       }
   }
-  if(lastright == '9'){
+  else{
+    if(timer[0]>=COUNTER){
+      timer[0] = 0;
+    }
+    else{
+      timer[0]++;
+    }
+  }
+
+  if(lastright == '1'){
+    variableright = 95;
+  }
+  else if(lastright == '3' && timer[1]==0){
+      timer[1]++;
+      if(variableright < 120){
+        variableright++;
+      }
+      else if(variableright > 120){
+        variableright--;
+      }
+  }
+  else if(lastright == '5' && timer[1]==0){
+      timer[1]++;
+      if(variableright > 60){
+        variableright--;
+      }
+      else if(variableright < 60){
+        variableright++;
+      }
+  }
+  else if(lastright == '7' && timer[1]==0){
+      timer[1]++;
+      if(variableright < 150){
+        variableright++;
+      }
+      else if(variableright > 150){
+        variableright--;
+      }  
+  }
+  else if(lastright == '9' && timer[1]==0){
+      timer[1]++;
       if(variableright > 30){
         variableright--;
       }
-      if(variableright < 30){
+      else if(variableright < 30){
         variableright++;
       }
+  }
+  else{
+    if(timer[1]>=COUNTER){
+      timer[1]=0;
+    }
+    else{
+      timer[1]++;
+    }
   }
   
   //after serial data was read update all appropriate motors/servos/relays  
@@ -229,6 +263,19 @@ void loop() {
   rightmotor.write(variableright);
   armbase.write(armbasepos);
   
+//  if(timer >=COUNTER){
+//    timer=0;
+//  }
+//  else{
+//    timer++;
+//  }
+
+  //Need to implement change based on time conditions are meet
+  //Issue: by the time code is updated, change to previous values have been made
+  //fix: need to intrduce currVal and lastVal that will keep track of changes(on my own time)
+  //fix2: add counter to section of code where motor speed is changed
+  //!!!!fix3: add counter to left and right wheel, only updates after every nth loop!!!!
+
   //This count is just a very unprofessional way to make the robot stop if it hasn't recieved input from the controller after so many clock cycles [safety check]
 //  countl++;
 //  countr++;
